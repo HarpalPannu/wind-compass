@@ -50,17 +50,30 @@ class WindCompass extends HTMLElement {
     this.dispatchEvent(event);
   }
 
-  _getBeaufort(kmh) {
-    if (kmh < 1) return { bft: 0, label: 'Calm', color: '#38bdf8' };
-    if (kmh < 6) return { bft: 1, label: 'Light Air', color: '#2dd4bf' };
-    if (kmh < 12) return { bft: 2, label: 'Light Breeze', color: '#34d399' };
-    if (kmh < 20) return { bft: 3, label: 'Gentle Breeze', color: '#10b981' };
-    if (kmh < 29) return { bft: 4, label: 'Moderate', color: '#a3e635' };
-    if (kmh < 39) return { bft: 5, label: 'Fresh Breeze', color: '#facc15' };
-    if (kmh < 50) return { bft: 6, label: 'Strong Breeze', color: '#fb923c' };
-    if (kmh < 62) return { bft: 7, label: 'Near Gale', color: '#f97316' };
-    if (kmh < 75) return { bft: 8, label: 'Gale', color: '#ef4444' };
-    return { bft: 9, label: 'Storm Force', color: '#ec4899' };
+  _getBeaufort(kmh, isDark = true) {
+    if (isDark) {
+      if (kmh < 1) return { bft: 0, label: 'Calm', color: '#38bdf8' };
+      if (kmh < 6) return { bft: 1, label: 'Light Air', color: '#2dd4bf' };
+      if (kmh < 12) return { bft: 2, label: 'Light Breeze', color: '#34d399' };
+      if (kmh < 20) return { bft: 3, label: 'Gentle Breeze', color: '#10b981' };
+      if (kmh < 29) return { bft: 4, label: 'Moderate', color: '#a3e635' };
+      if (kmh < 39) return { bft: 5, label: 'Fresh Breeze', color: '#facc15' };
+      if (kmh < 50) return { bft: 6, label: 'Strong Breeze', color: '#fb923c' };
+      if (kmh < 62) return { bft: 7, label: 'Near Gale', color: '#f97316' };
+      if (kmh < 75) return { bft: 8, label: 'Gale', color: '#ef4444' };
+      return { bft: 9, label: 'Storm Force', color: '#ec4899' };
+    } else {
+      if (kmh < 1) return { bft: 0, label: 'Calm', color: '#0284c7' };
+      if (kmh < 6) return { bft: 1, label: 'Light Air', color: '#0d9488' };
+      if (kmh < 12) return { bft: 2, label: 'Light Breeze', color: '#059669' };
+      if (kmh < 20) return { bft: 3, label: 'Gentle Breeze', color: '#047857' };
+      if (kmh < 29) return { bft: 4, label: 'Moderate', color: '#65a30d' };
+      if (kmh < 39) return { bft: 5, label: 'Fresh Breeze', color: '#d97706' };
+      if (kmh < 50) return { bft: 6, label: 'Strong Breeze', color: '#ea580c' };
+      if (kmh < 62) return { bft: 7, label: 'Near Gale', color: '#c2410c' };
+      if (kmh < 75) return { bft: 8, label: 'Gale', color: '#dc2626' };
+      return { bft: 9, label: 'Storm Force', color: '#be185d' };
+    }
   }
 
   _getCardinal16(deg) {
@@ -148,17 +161,130 @@ class WindCompass extends HTMLElement {
         :host {
           display: block;
           --accent: #34d399;
-          --gust-accent: #fb923c;
+          --card-bg: var(--ha-card-background, var(--card-background-color, #1c1c1e));
+          --card-border: color-mix(in srgb, var(--accent) 30%, rgba(255, 255, 255, 0.1));
+          --card-glow: radial-gradient(circle, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 72%);
+          --text-primary: var(--primary-text-color, rgba(255, 255, 255, 0.88));
+          --text-secondary: var(--secondary-text-color, rgba(255, 255, 255, 0.55));
+          --title-color: rgba(255, 255, 255, 0.78);
+          --badge-bg: color-mix(in srgb, var(--accent) 14%, rgba(255, 255, 255, 0.04));
+          --badge-border: color-mix(in srgb, var(--accent) 32%, transparent);
+          --badge-color: var(--accent);
+          --box-bg: rgba(255, 255, 255, 0.04);
+          --box-bg-hover: rgba(255, 255, 255, 0.075);
+          --box-border: rgba(255, 255, 255, 0.08);
+          --box-border-hover: rgba(255, 255, 255, 0.2);
+          --metric-val-color: #ffffff;
+          --metric-unit-color: rgba(255, 255, 255, 0.6);
+          --metric-sub-color: rgba(255, 255, 255, 0.52);
+          --speed-color: #38bdf8;
+          --gust-color: #fb923c;
+          --dir-color: var(--accent);
+          --dial-stop-0: rgba(56, 189, 248, 0.06);
+          --dial-stop-65: rgba(15, 23, 42, 0.5);
+          --dial-stop-100: rgba(15, 23, 42, 0.92);
+          --dial-outer-stroke: url(#ringGrad);
+          --dial-dashed-ring: rgba(255, 255, 255, 0.08);
+          --hub-fill: rgba(20, 22, 28, 0.94);
+          --hub-stroke: url(#ringGrad);
+          --hub-cardinal-color: #ffffff;
+          --needle-orb-fill: #18181b;
+          --needle-south-color: #38bdf8;
+          --arrow-glow-color: rgba(0, 0, 0, 0.65);
+          --cardinal-n: #ff453a;
+          --cardinal-e: #fbbf24;
+          --cardinal-s: #38bdf8;
+          --cardinal-w: #34d399;
           font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
         }
+
+        :host([light-mode]),
+        :host-context([data-theme="light"]),
+        :host-context(html.light) {
+          --card-bg: var(--ha-card-background, var(--card-background-color, #ffffff));
+          --card-border: var(--ha-card-border-color, color-mix(in srgb, var(--accent) 30%, rgba(0, 0, 0, 0.09)));
+          --card-glow: radial-gradient(circle, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 70%);
+          --text-primary: var(--primary-text-color, #0f172a);
+          --text-secondary: var(--secondary-text-color, #64748b);
+          --title-color: #0f172a;
+          --badge-bg: color-mix(in srgb, var(--accent) 14%, #ffffff);
+          --badge-border: color-mix(in srgb, var(--accent) 35%, rgba(0, 0, 0, 0.1));
+          --badge-color: var(--accent);
+          --box-bg: rgba(0, 0, 0, 0.025);
+          --box-bg-hover: rgba(0, 0, 0, 0.05);
+          --box-border: rgba(0, 0, 0, 0.08);
+          --box-border-hover: rgba(0, 0, 0, 0.16);
+          --metric-val-color: #0f172a;
+          --metric-unit-color: #64748b;
+          --metric-sub-color: #64748b;
+          --speed-color: #0284c7;
+          --gust-color: #ea580c;
+          --dir-color: var(--accent);
+          --dial-stop-0: rgba(241, 245, 249, 0.6);
+          --dial-stop-65: rgba(248, 250, 252, 0.85);
+          --dial-stop-100: #f1f5f9;
+          --dial-outer-stroke: color-mix(in srgb, var(--accent) 30%, rgba(0, 0, 0, 0.12));
+          --dial-dashed-ring: rgba(0, 0, 0, 0.09);
+          --hub-fill: #ffffff;
+          --hub-stroke: color-mix(in srgb, var(--accent) 35%, rgba(0, 0, 0, 0.12));
+          --hub-cardinal-color: #0f172a;
+          --needle-orb-fill: #ffffff;
+          --needle-south-color: #0284c7;
+          --arrow-glow-color: rgba(0, 0, 0, 0.16);
+          --cardinal-n: #dc2626;
+          --cardinal-e: #d97706;
+          --cardinal-s: #0284c7;
+          --cardinal-w: #059669;
+        }
+
+        @media (prefers-color-scheme: light) {
+          :host(:not([light-mode="false"])) {
+            --card-bg: var(--ha-card-background, var(--card-background-color, #ffffff));
+            --card-border: var(--ha-card-border-color, color-mix(in srgb, var(--accent) 30%, rgba(0, 0, 0, 0.09)));
+            --card-glow: radial-gradient(circle, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 70%);
+            --text-primary: var(--primary-text-color, #0f172a);
+            --text-secondary: var(--secondary-text-color, #64748b);
+            --title-color: #0f172a;
+            --badge-bg: color-mix(in srgb, var(--accent) 14%, #ffffff);
+            --badge-border: color-mix(in srgb, var(--accent) 35%, rgba(0, 0, 0, 0.1));
+            --badge-color: var(--accent);
+            --box-bg: rgba(0, 0, 0, 0.025);
+            --box-bg-hover: rgba(0, 0, 0, 0.05);
+            --box-border: rgba(0, 0, 0, 0.08);
+            --box-border-hover: rgba(0, 0, 0, 0.16);
+            --metric-val-color: #0f172a;
+            --metric-unit-color: #64748b;
+            --metric-sub-color: #64748b;
+            --speed-color: #0284c7;
+            --gust-color: #ea580c;
+            --dir-color: var(--accent);
+            --dial-stop-0: rgba(241, 245, 249, 0.6);
+            --dial-stop-65: rgba(248, 250, 252, 0.85);
+            --dial-stop-100: #f1f5f9;
+            --dial-outer-stroke: color-mix(in srgb, var(--accent) 30%, rgba(0, 0, 0, 0.12));
+            --dial-dashed-ring: rgba(0, 0, 0, 0.09);
+            --hub-fill: #ffffff;
+            --hub-stroke: color-mix(in srgb, var(--accent) 35%, rgba(0, 0, 0, 0.12));
+            --hub-cardinal-color: #0f172a;
+            --needle-orb-fill: #ffffff;
+            --needle-south-color: #0284c7;
+            --arrow-glow-color: rgba(0, 0, 0, 0.16);
+            --cardinal-n: #dc2626;
+            --cardinal-e: #d97706;
+            --cardinal-s: #0284c7;
+            --cardinal-w: #059669;
+          }
+        }
+
         ha-card {
           position: relative;
           overflow: hidden;
           padding: 14px 14px 15px 14px;
-          background: var(--ha-card-background, var(--card-background-color, #1c1c1e));
-          border: 1px solid color-mix(in srgb, var(--accent) 30%, rgba(255, 255, 255, 0.1));
+          background: var(--card-bg);
+          border: 1px solid var(--card-border);
           border-radius: var(--ha-card-border-radius, 18px);
           box-sizing: border-box;
+          box-shadow: var(--ha-card-box-shadow, none);
         }
         ha-card::before {
           content: '';
@@ -167,7 +293,7 @@ class WindCompass extends HTMLElement {
           left: -20px;
           width: 240px;
           height: 240px;
-          background: radial-gradient(circle, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 72%);
+          background: var(--card-glow);
           pointer-events: none;
           z-index: 0;
         }
@@ -197,7 +323,7 @@ class WindCompass extends HTMLElement {
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.6px;
-          color: rgba(255, 255, 255, 0.78);
+          color: var(--title-color);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -205,9 +331,9 @@ class WindCompass extends HTMLElement {
         .subtitle-badge {
           font-size: 11px;
           font-weight: 600;
-          color: var(--accent);
-          background: color-mix(in srgb, var(--accent) 14%, rgba(255, 255, 255, 0.04));
-          border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+          color: var(--badge-color);
+          background: var(--badge-bg);
+          border: 1px solid var(--badge-border);
           padding: 2px 9px;
           border-radius: 999px;
           white-space: nowrap;
@@ -256,8 +382,8 @@ class WindCompass extends HTMLElement {
           height: 100%;
         }
         .metric-box {
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: var(--box-bg);
+          border: 1px solid var(--box-border);
           border-radius: 12px;
           padding: 8px 10px;
           cursor: pointer;
@@ -265,17 +391,17 @@ class WindCompass extends HTMLElement {
           min-width: 0;
         }
         .metric-box.speed {
-          border-left: 3px solid #38bdf8;
+          border-left: 3px solid var(--speed-color);
         }
         .metric-box.gust {
-          border-left: 3px solid #fb923c;
+          border-left: 3px solid var(--gust-color);
         }
         .metric-box.dir {
-          border-left: 3px solid var(--accent);
+          border-left: 3px solid var(--dir-color);
         }
         .metric-box:hover {
-          background: rgba(255, 255, 255, 0.075);
-          border-color: rgba(255, 255, 255, 0.2);
+          background: var(--box-bg-hover);
+          border-color: var(--box-border-hover);
           transform: translateY(-1px);
         }
         .metric-label {
@@ -283,13 +409,13 @@ class WindCompass extends HTMLElement {
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          color: rgba(255, 255, 255, 0.55);
+          color: var(--text-secondary);
           margin-bottom: 2px;
           white-space: nowrap;
         }
-        .metric-box.speed .metric-label { color: #38bdf8; }
-        .metric-box.gust .metric-label { color: #fb923c; }
-        .metric-box.dir .metric-label { color: var(--accent); }
+        .metric-box.speed .metric-label { color: var(--speed-color); }
+        .metric-box.gust .metric-label { color: var(--gust-color); }
+        .metric-box.dir .metric-label { color: var(--dir-color); }
         .metric-val-row {
           display: flex;
           align-items: baseline;
@@ -298,7 +424,7 @@ class WindCompass extends HTMLElement {
         .metric-val {
           font-size: 16.5px;
           font-weight: 700;
-          color: #ffffff;
+          color: var(--metric-val-color);
           line-height: 1.15;
           letter-spacing: -0.2px;
           white-space: nowrap;
@@ -306,12 +432,12 @@ class WindCompass extends HTMLElement {
         .metric-unit {
           font-size: 10.5px;
           font-weight: 600;
-          color: rgba(255, 255, 255, 0.6);
+          color: var(--metric-unit-color);
         }
         .metric-sub {
           font-size: 10px;
           font-weight: 500;
-          color: rgba(255, 255, 255, 0.52);
+          color: var(--metric-sub-color);
           margin-top: 2px;
           white-space: nowrap;
           overflow: hidden;
@@ -333,41 +459,41 @@ class WindCompass extends HTMLElement {
               <svg class="compass-svg" viewBox="0 0 240 240">
                 <defs>
                   <radialGradient id="appleDialBg" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stop-color="rgba(56,189,248,0.06)"/>
-                    <stop offset="65%" stop-color="rgba(15,23,42,0.5)"/>
-                    <stop offset="100%" stop-color="rgba(15,23,42,0.92)"/>
+                    <stop offset="0%" stop-color="var(--dial-stop-0)"/>
+                    <stop offset="65%" stop-color="var(--dial-stop-65)"/>
+                    <stop offset="100%" stop-color="var(--dial-stop-100)"/>
                   </radialGradient>
                   <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stop-color="#ff453a" stop-opacity="0.5"/>
-                    <stop offset="33%" stop-color="#fbbf24" stop-opacity="0.4"/>
-                    <stop offset="66%" stop-color="#38bdf8" stop-opacity="0.5"/>
-                    <stop offset="100%" stop-color="#34d399" stop-opacity="0.5"/>
+                    <stop offset="33%" stop-color="var(--cardinal-e)" stop-opacity="0.4"/>
+                    <stop offset="66%" stop-color="var(--cardinal-s)" stop-opacity="0.5"/>
+                    <stop offset="100%" stop-color="var(--cardinal-w)" stop-opacity="0.5"/>
                   </linearGradient>
                   <filter id="arrowGlow" x="-25%" y="-25%" width="150%" height="150%">
-                    <feDropShadow dx="0" dy="1" stdDeviation="2.5" flood-color="rgba(0,0,0,0.65)"/>
+                    <feDropShadow dx="0" dy="1" stdDeviation="2.5" flood-color="var(--arrow-glow-color)"/>
                   </filter>
                 </defs>
 
-                <circle cx="120" cy="120" r="112" fill="url(#appleDialBg)" stroke="url(#ringGrad)" stroke-width="1.5"/>
-                <circle cx="120" cy="120" r="60" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3 3"/>
+                <circle cx="120" cy="120" r="112" fill="url(#appleDialBg)" stroke="var(--dial-outer-stroke)" stroke-width="1.5"/>
+                <circle cx="120" cy="120" r="60" fill="none" stroke="var(--dial-dashed-ring)" stroke-width="1" stroke-dasharray="3 3"/>
 
                 <g>${dialSvg}</g>
 
-                <text x="120" y="39" fill="#ff453a" font-size="14.5" font-weight="800" text-anchor="middle" dominant-baseline="central">N</text>
-                <text x="201" y="120" fill="#fbbf24" font-size="14" font-weight="800" text-anchor="middle" dominant-baseline="central">E</text>
-                <text x="120" y="201" fill="#38bdf8" font-size="14" font-weight="800" text-anchor="middle" dominant-baseline="central">S</text>
-                <text x="39" y="120" fill="#34d399" font-size="14" font-weight="800" text-anchor="middle" dominant-baseline="central">W</text>
+                <text x="120" y="39" fill="var(--cardinal-n)" font-size="14.5" font-weight="800" text-anchor="middle" dominant-baseline="central">N</text>
+                <text x="201" y="120" fill="var(--cardinal-e)" font-size="14" font-weight="800" text-anchor="middle" dominant-baseline="central">E</text>
+                <text x="120" y="201" fill="var(--cardinal-s)" font-size="14" font-weight="800" text-anchor="middle" dominant-baseline="central">S</text>
+                <text x="39" y="120" fill="var(--cardinal-w)" font-size="14" font-weight="800" text-anchor="middle" dominant-baseline="central">W</text>
 
                 <g class="needle-group" id="needle-group" filter="url(#arrowGlow)">
                   <path d="M 120 120 L 96 22 A 100 100 0 0 1 144 22 Z" fill="var(--accent)" opacity="0.18"/>
                   <line x1="120" y1="22" x2="120" y2="66" stroke="var(--accent)" stroke-width="3.6" stroke-linecap="round"/>
-                  <circle cx="120" cy="17" r="5" fill="#18181b" stroke="var(--accent)" stroke-width="3"/>
-                  <line x1="120" y1="174" x2="120" y2="213" stroke="#38bdf8" stroke-width="3.6" stroke-linecap="round"/>
-                  <polygon points="120,225 111,207 120,211 129,207" fill="#38bdf8"/>
+                  <circle cx="120" cy="17" r="5" fill="var(--needle-orb-fill)" stroke="var(--accent)" stroke-width="3"/>
+                  <line x1="120" y1="174" x2="120" y2="213" stroke="var(--needle-south-color)" stroke-width="3.6" stroke-linecap="round"/>
+                  <polygon points="120,225 111,207 120,211 129,207" fill="var(--needle-south-color)"/>
                 </g>
 
-                <circle cx="120" cy="120" r="46" fill="rgba(20,22,28,0.94)" stroke="url(#ringGrad)" stroke-width="1.8"/>
-                <text x="120" y="113" id="hub-cardinal" fill="#ffffff" font-size="22" font-weight="800" text-anchor="middle" dominant-baseline="central">---</text>
+                <circle cx="120" cy="120" r="46" fill="var(--hub-fill)" stroke="var(--hub-stroke)" stroke-width="1.8"/>
+                <text x="120" y="113" id="hub-cardinal" fill="var(--hub-cardinal-color)" font-size="22" font-weight="800" text-anchor="middle" dominant-baseline="central">---</text>
                 <text x="120" y="133" id="hub-deg" fill="var(--accent)" font-size="11.5" font-weight="700" text-anchor="middle" dominant-baseline="central">---°</text>
               </svg>
             </div>
@@ -422,6 +548,22 @@ class WindCompass extends HTMLElement {
   _update() {
     if (!this._hass || !this._config || !this._initialized) return;
 
+    let isDark = true;
+    if (this._config && this._config.theme_mode === 'light') {
+      isDark = false;
+    } else if (this._config && this._config.theme_mode === 'dark') {
+      isDark = true;
+    } else if (this._hass && this._hass.themes && typeof this._hass.themes.darkMode === 'boolean') {
+      isDark = this._hass.themes.darkMode;
+    } else if (typeof window !== 'undefined' && window.matchMedia) {
+      isDark = !window.matchMedia('(prefers-color-scheme: light)').matches;
+    }
+    if (isDark) {
+      this.removeAttribute('light-mode');
+    } else {
+      this.setAttribute('light-mode', '');
+    }
+
     const dirState = this._hass.states[this._config.direction_entity];
     const speedState = this._hass.states[this._config.speed_entity];
     const gustState = this._hass.states[this._config.gust_entity];
@@ -439,7 +581,7 @@ class WindCompass extends HTMLElement {
       this._currentAngle += diff;
     }
 
-    const bft = this._getBeaufort(speed);
+    const bft = this._getBeaufort(speed, isDark);
     const cardinal = this._getCardinal16(deg);
     const toDeg = (deg + 180) % 360;
     const toCardinal = this._getCardinal16(toDeg);
